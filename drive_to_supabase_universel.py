@@ -59,7 +59,7 @@ for file in files:
 
     # Lecture du CSV
     try:
-        df = pd.read_csv(local_path, sep=";", encoding="utf-8")
+        df = pd.read_csv(local_path, sep=";", encoding="ISO-8859-1")
     except Exception as e:
         print(f"❌ Erreur de lecture : {e}")
         continue
