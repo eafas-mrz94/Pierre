@@ -18,7 +18,7 @@ DB_CONFIG = {
     'user': 'postgres',
     'password': 'Pierre2025',
     'host': 'db.ynximbxkdbangzqlxhly.supabase.co',
-    'port': '6432'
+    'port': '5432'
 }
 
 # === SETUP ===
