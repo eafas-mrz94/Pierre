@@ -1,13 +1,14 @@
 name: Sync CSV to Supabase
 
 on:
+  workflow_dispatch:     # Pour le lancer à la main
   schedule:
-    - cron: '0 7 * * *'  # Tous les jours à 7h du matin (UTC)
-  workflow_dispatch:     # Permet de le déclencher à la main
+    - cron: '0 7 * * *'  # Tous les jours à 7h (UTC)
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -21,14 +22,17 @@ jobs:
         run: |
           pip install pandas psycopg2-binary google-api-python-client google-auth google-auth-oauthlib
 
+      - name: Recreate Google JSON key
+        env:
+          GOOGLE_KEY_JSON_BASE64: ${{ secrets.GOOGLE_KEY_JSON_BASE64 }}
+        run: echo "$GOOGLE_KEY_JSON_BASE64" | base64 -d > pierre-pleignet.json
+
       - name: Run script
         env:
           DB_NAME: postgres
           DB_USER: postgres
           DB_PASS: ${{ secrets.DB_PASS }}
-          DB_HOST: db.xxxxxx.supabase.co
+          DB_HOST: db.ynximbxkdbangzqlxhly.supabase.co
           DB_PORT: 5432
-          GOOGLE_KEY_JSON: ${{ secrets.GOOGLE_KEY_JSON }}
-        run: |
-          echo "$GOOGLE_KEY_JSON" > pierre-pleignet.json
-          python drive_to_supabase_universel.py
+        run: python drive_to_supabase_universel.py
+
