@@ -8,41 +8,32 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from rapidfuzz import process
 
-# Configuration
 FOLDER_ID = "1K4Vgc-pyLuMcJUJ_Wel2hNCoUnDomTim"
 DATABASE_URL = "postgresql://neondb_owner:npg_fGCgBXD0EkR8@ep-mute-tooth-a20kp0rx-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require"
 SERVICE_ACCOUNT_FILE = "pierre-pleignet.json"
 DOWNLOAD_DIR = "telechargements_csv"
 
-# Authentification Google Drive
 credentials = service_account.Credentials.from_service_account_file(
     SERVICE_ACCOUNT_FILE,
     scopes=["https://www.googleapis.com/auth/drive"]
 )
 drive_service = build("drive", "v3", credentials=credentials)
-
-# Créer le dossier local si nécessaire
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-# Récupérer la liste des fichiers CSV
 results = drive_service.files().list(
     q=f"'{FOLDER_ID}' in parents and mimeType='text/csv'",
     fields="files(id, name)"
 ).execute()
 
 files = results.get("files", [])
-
-# Connexion à PostgreSQL
 conn = psycopg2.connect(DATABASE_URL)
 cursor = conn.cursor()
 
-# Traitement de chaque fichier
 for file in files:
     file_id = file["id"]
     file_name = file["name"]
     print(f"📥 Fichier détecté : {file_name}")
 
-    # Télécharger le fichier
     request = drive_service.files().get_media(fileId=file_id)
     fh = io.BytesIO()
     downloader = MediaIoBaseDownload(fh, request)
@@ -57,22 +48,22 @@ for file in files:
 
     print(f"✅ Téléchargé : {cleaned_name}")
 
-    # Lecture du CSV
     try:
-        df = pd.read_csv(local_path, sep=";", encoding="ISO-8859-1")
+        try:
+            df = pd.read_csv(local_path, sep=";", encoding="utf-8")
+        except UnicodeDecodeError:
+            df = pd.read_csv(local_path, sep=";", encoding="ISO-8859-1")
     except Exception as e:
         print(f"❌ Erreur de lecture : {e}")
         continue
 
     print(f"📊 Colonnes détectées : {list(df.columns)}")
 
-    # Normalisation
     df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
     entreprise = file_name.split("_")[0]
     type_fichier = file_name.split("_")[1] if "_" in file_name else "inconnu"
     date_import = datetime.datetime.now()
 
-    # Insertion dans PostgreSQL
     try:
         for i, row in df.iterrows():
             for col in df.columns:
