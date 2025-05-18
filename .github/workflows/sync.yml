@@ -1,30 +1,32 @@
-name: Import CSV to Neon DB
+name: Sync CSV from Drive to Neon
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:   # Déclenchable manuellement
+  schedule:
+    - cron: '0 7 * * *'  # Tous les jours à 7h UTC
 
 jobs:
-  run-script:
+  sync-job:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: 📁 Cloner le repo
       uses: actions/checkout@v3
 
-    - name: Set up Python
+    - name: 🐍 Installer Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Install dependencies
+    - name: 🧩 Installer les dépendances
       run: |
         pip install --upgrade pip
         pip install pandas google-api-python-client google-auth rapidfuzz psycopg2-binary
 
-    - name: Recreate Google JSON key
+    - name: 🔐 Recréer la clé de service Google (JSON)
       env:
         GOOGLE_KEY_JSON_BASE64: ${{ secrets.GOOGLE_KEY_JSON_BASE64 }}
       run: echo "$GOOGLE_KEY_JSON_BASE64" | base64 -d > pierre-pleignet.json
 
-    - name: Run script
-      run: python drive_to_supabase_universel.py
+    - name: 🚀 Exécuter le script
+      run: python drive_to_neon_postgres.py
