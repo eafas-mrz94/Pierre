@@ -9,7 +9,7 @@ from googleapiclient.http import MediaIoBaseDownload
 from rapidfuzz import process
 
 FOLDER_ID = "1K4Vgc-pyLuMcJUJ_Wel2hNCoUnDomTim"
-DATABASE_URL = "postgresql://neondb_owner:npg_fGCgBXD0EkR8@ep-mute-tooth-a20kp0rx-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL = "postgresql://zenova:Pierrepleignet2025@localhost:5432/donnees_clients"
 SERVICE_ACCOUNT_FILE = "pierre-pleignet.json"
 DOWNLOAD_DIR = "telechargements_csv"
 
